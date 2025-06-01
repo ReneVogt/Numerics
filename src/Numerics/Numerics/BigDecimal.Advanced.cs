@@ -19,7 +19,7 @@ public readonly partial struct BigDecimal
     /// </summary>
     /// <returns>The square root of the current <see cref="BigDecimal"/> truncated at
     /// <see cref="BigDecimalContext.Precision"/> decimal digits.</returns>.
-    public BigDecimal Sqrt(BigInteger precision) => throw new NotImplementedException();
+    public BigDecimal Sqrt(int precision) => throw new NotImplementedException();
 
     /// <summary>
     /// Calculates the square root of the given
@@ -40,5 +40,5 @@ public readonly partial struct BigDecimal
     /// <param name="precision">The number of decimal digits to generate.</param>
     /// <returns>The square root of the given <paramref name="value"/> truncated at
     /// <paramref name="precision"/> decimal digits.</returns>.
-    public static BigDecimal Sqrt(BigDecimal value, BigInteger precision) => value.Sqrt(precision);
+    public static BigDecimal Sqrt(BigDecimal value, int precision) => value.Sqrt(precision);
 }

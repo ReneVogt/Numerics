@@ -9,43 +9,8 @@ namespace Revo.Numerics;
 public readonly partial struct BigDecimal : INumber<BigDecimal>,
     ISignedNumber<BigDecimal>
 {
-    static readonly BigDecimal _zero = new(0, 0);
-    static readonly BigDecimal _one = new(1, 0);
-    static readonly BigDecimal _negativeOne = new(-1, 0);
-
-    /// <summary>
-    /// Gets a <see cref="BigDecimal"/> representing
-    /// the value 1.
-    /// </summary>
-    public static BigDecimal One => _one;
-    /// <summary>
-    /// Gets a <see cref="BigDecimal"/> representing
-    /// the value 0.
-    /// </summary>
-    public static BigDecimal Zero => _zero;
-    /// <summary>
-    /// Gets a <see cref="BigDecimal"/> representing
-    /// the value -1.
-    /// </summary>
-    public static BigDecimal NegativeOne => _negativeOne;
-
-    /// <summary>
-    /// The radix of <see cref="BigDecimal"/>.
-    /// This is always 10.
-    /// </summary>
-    public static int Radix => 10;
-
-    /// <summary>
-    /// Gets the additive identity (0) of the <see cref="BigDecimal"/> type.
-    /// </summary>
-    public static BigDecimal AdditiveIdentity => _zero;
-    /// <summary>
-    /// Gets the multiplicative identity (1) of the <see cref="BigDecimal"/> type.
-    /// </summary>
-    public static BigDecimal MultiplicativeIdentity => _one;
-
     public BigInteger Mantissa { get; }
-    public BigInteger Exponent { get; }
+    public int Exponent { get; }
 
     /// <summary>
     /// Initielizes a new <see cref="BigDecimal"/> with the
@@ -117,22 +82,22 @@ public readonly partial struct BigDecimal : INumber<BigDecimal>,
     /// </summary>
     /// <param name="mantissa">The mantissa for the new <see cref="BigDecimal"/>.</param>
     /// <param name="exponent">The exponent for the new <see cref="BigDecimal"/>.</param>
-    public BigDecimal(BigInteger mantissa, BigInteger exponent) => (Mantissa, Exponent) = Normalize(mantissa, exponent);
+    public BigDecimal(BigInteger mantissa, int exponent) => (Mantissa, Exponent) = Normalize(mantissa, exponent);
 
-    static (BigInteger Mantissa, BigInteger Exponent) Normalize(BigInteger mantissa, BigInteger exponent)
+    static (BigInteger Mantissa, int Exponent) Normalize(BigInteger mantissa, int exponent)
     {
         if (mantissa.IsZero) return (0, 0);
 
-        // We know, this is not the most efficient way,
-        // but handling a BigInteger exponent is tricky.
-        while(BigInteger.Remainder(mantissa, 10) == 0)
+        for(; ;)
         {
-            mantissa /= 10;
-            exponent++;
+            var (t, r) = BigInteger.DivRem(mantissa, 10);
+            if (!r.IsZero) return (mantissa, exponent);
+            mantissa = t;
+            checked { exponent++; }
         }
-
-        return (mantissa, exponent);
     }
+
+    public void Deconstruct(out BigInteger mantissa, out int exponent) => (mantissa, exponent) = (Mantissa, Exponent);
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(Mantissa, Exponent);

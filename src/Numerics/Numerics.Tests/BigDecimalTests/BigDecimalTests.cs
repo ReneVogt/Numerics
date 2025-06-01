@@ -197,7 +197,7 @@ public sealed partial class BigDecimalTests
     [Trait("BigDecimal", "Construction")]
     public void Construct_FromScratch_Zero()
     {
-        BigDecimal sut = new(BigInteger.Zero, new BigInteger(123));
+        BigDecimal sut = new(BigInteger.Zero, 123);
         Assert.Equal(0, sut.Mantissa);
         Assert.Equal(0, sut.Exponent);
     }
@@ -210,6 +210,28 @@ public sealed partial class BigDecimalTests
         Assert.Equal(7, sut.Exponent);
     }
 
+    [Theory]
+    [MemberData(nameof(ProvideDeconstructorTestCases))]
+    [Trait("BigDecimal", "Construction")]
+    public void Deconstruct(TestableBigDecimal value)
+    {
+        var (mantissa, exponent) = value.Value;
+        Assert.Equal(value.Value.Sign, mantissa.Sign);
+        Assert.Equal(value.Value.Mantissa, mantissa);
+        Assert.Equal(value.Value.Exponent, exponent);
+    }
+
+    public static TheoryData<TestableBigDecimal> ProvideDeconstructorTestCases() => new()
+    {
+        new BigDecimal(-12, -30),
+        new BigDecimal(-12, 31),
+        new BigDecimal(17, -1),
+        new BigDecimal(17, 123),
+        BigDecimal.One,
+        BigDecimal.Zero,
+        BigDecimal.NegativeOne
+    };
+
     public sealed class TestableBigDecimal(BigDecimal value) : IXunitSerializable
     {
         public BigDecimal Value { get; private set; } = value;
@@ -219,7 +241,7 @@ public sealed partial class BigDecimalTests
         public void Deserialize(IXunitSerializationInfo info)
         {
             var mantissa = info.GetValue<BigInteger>("Mantissa");
-            var exponent = info.GetValue<BigInteger>("Exponent");
+            var exponent = info.GetValue<int>("Exponent");
             Value = new(mantissa, exponent);
         }
 

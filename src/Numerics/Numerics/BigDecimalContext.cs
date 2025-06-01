@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Revo.Numerics;
+﻿namespace Revo.Numerics;
 
 /// <summary>
 /// Defines behaviour (precision) of
@@ -8,7 +6,7 @@ namespace Revo.Numerics;
 /// </summary>
 public static class BigDecimalContext
 {
-    static readonly ThreadLocal<BigInteger> _precision = new(() => 28);
+    static readonly ThreadLocal<int> _precision = new(() => 28);
 
     /// <summary>
     /// The maximum precision used by the <see cref="BigDecimal"/> type.
@@ -18,7 +16,7 @@ public static class BigDecimalContext
     /// 
     /// This value is thread local.
     /// </summary>
-    public static BigInteger Precision
+    public static int Precision
     {
         get => _precision.Value;
         set => _precision.Value = value;

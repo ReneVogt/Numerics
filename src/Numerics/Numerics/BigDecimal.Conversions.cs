@@ -326,32 +326,9 @@ public readonly partial struct BigDecimal
     public static object? TryConvertToBigIntegerChecked(BigDecimal value)
     {
         if (value.Exponent < 0) return null;
+        if (value.Exponent > int.MaxValue) return null;
         return Shift(value.Mantissa, value.Exponent);
     }
     public static object? TryConvertToBigIntegerSaturating(BigDecimal value) => TryConvertToBigIntegerChecked(value);
     public static object? TryConvertToBigIntegerTruncating(BigDecimal value) => Shift(value.Mantissa, value.Exponent);
-
-    static BigInteger Shift(BigInteger mantissa, BigInteger shift)
-    {
-        if (shift == 0) return mantissa;
-        if (shift <= int.MaxValue && shift >= int.MinValue)
-        {
-            var d = (int)shift;
-            return d < 0 
-                ? mantissa / BigInteger.Pow(10, -d)
-                : mantissa * BigInteger.Pow(10, d);
-        }
-        while(shift < 0)
-        {
-            mantissa /= 10;
-            shift++;
-        }
-        while(shift > 0)
-        {
-            mantissa *=10;
-            shift--;
-        }
-
-        return mantissa;
-    }
 }

@@ -39,7 +39,7 @@ public readonly partial struct BigDecimal
 
         if (exponentStart < 2 || exponentStart >= s.Length - 1 || s[exponentStart-1] != ' ' ||
             !BigInteger.TryParse(s[0..(exponentStart-1)], style, provider, out var mantissa) ||
-            !BigInteger.TryParse(s[(exponentStart+1)..], style, provider, out var exponent))
+            !int.TryParse(s[(exponentStart+1)..], style, provider, out var exponent))
             return false;
 
         result = new(mantissa, exponent);

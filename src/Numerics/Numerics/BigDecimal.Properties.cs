@@ -4,6 +4,41 @@ namespace Revo.Numerics;
 
 public readonly partial struct BigDecimal
 {
+    static readonly BigDecimal _zero = new(0, 0);
+    static readonly BigDecimal _one = new(1, 0);
+    static readonly BigDecimal _negativeOne = new(-1, 0);
+
+    /// <summary>
+    /// Gets a <see cref="BigDecimal"/> representing
+    /// the value 1.
+    /// </summary>
+    public static BigDecimal One => _one;
+    /// <summary>
+    /// Gets a <see cref="BigDecimal"/> representing
+    /// the value 0.
+    /// </summary>
+    public static BigDecimal Zero => _zero;
+    /// <summary>
+    /// Gets a <see cref="BigDecimal"/> representing
+    /// the value -1.
+    /// </summary>
+    public static BigDecimal NegativeOne => _negativeOne;
+
+    /// <summary>
+    /// The radix of <see cref="BigDecimal"/>.
+    /// This is always 10.
+    /// </summary>
+    public static int Radix => 10;
+
+    /// <summary>
+    /// Gets the additive identity (0) of the <see cref="BigDecimal"/> type.
+    /// </summary>
+    public static BigDecimal AdditiveIdentity => _zero;
+    /// <summary>
+    /// Gets the multiplicative identity (1) of the <see cref="BigDecimal"/> type.
+    /// </summary>
+    public static BigDecimal MultiplicativeIdentity => _one;
+
     /// <summary>
     /// Gets a number that indicates the sign (negative, positive, or zero) of the current <see cref="BigDecimal"/>.
     /// </summary>

@@ -47,22 +47,38 @@ public readonly partial struct BigDecimal
     public bool Equals(BigDecimal other) => Exponent.Equals(other.Exponent) && Mantissa.Equals(other.Mantissa);
 
     public static BigDecimal operator +(BigDecimal left, BigDecimal right) => left.Add(right);
-    public BigDecimal Add(BigDecimal summand) => throw new NotImplementedException();
+    public BigDecimal Add(BigDecimal summand)
+    {
+        var (m1, m2, e) = Align(summand);
+        return new(m1 + m2, e);
+    }
     public static BigDecimal operator -(BigDecimal left, BigDecimal right) => left.Subtract(right);
-    public BigDecimal Subtract(BigDecimal subtrahend) => throw new NotImplementedException();
+    public BigDecimal Subtract(BigDecimal subtrahend)
+    {
+        var (m1, m2, e) = Align(subtrahend);
+        return new(m1 - m2, e);
+    }
     public static BigDecimal operator *(BigDecimal left, BigDecimal right) => left.MultiplyBy(right);
-    public BigDecimal MultiplyBy(BigDecimal factor) => throw new NotImplementedException();
-    public static BigDecimal operator /(BigDecimal left, BigDecimal right) => left.DivideBy(right);
+    public BigDecimal MultiplyBy(BigDecimal factor)
+    {
+        var (m1, m2, e) = Align(factor);
+        return new(m1 * m2, 2 * e);
+    }
+    public static BigDecimal operator /(BigDecimal divident, BigDecimal divisor) => divident.DivideBy(divisor);
     public BigDecimal DivideBy(BigDecimal divisor) => DivideBy(divisor, BigDecimalContext.Precision);
-    public BigDecimal DivideBy(BigDecimal divisor, BigInteger precision) => throw new NotImplementedException();
-    public static BigDecimal operator %(BigDecimal left, BigDecimal right) => left.ModulusBy(right);
+    public BigDecimal DivideBy(BigDecimal divisor, int precision) => DivMod(this, divisor, precision).Quotient;
+    public static BigDecimal operator %(BigDecimal divident, BigDecimal divisor) => divident.ModulusBy(divisor);
     public BigDecimal ModulusBy(BigDecimal divisor) => ModulusBy(divisor, BigDecimalContext.Precision);
-    public BigDecimal ModulusBy(BigDecimal divisor, BigInteger precision) => throw new NotImplementedException();
+    public BigDecimal ModulusBy(BigDecimal divisor, int precision) => DivMod(this, divisor, precision).Modulus;
+    public static (BigDecimal Quotient, BigDecimal Modulus) DivMod(BigDecimal divident, BigDecimal divisor) => DivMod(divident, divisor, BigDecimalContext.Precision);
+    public static (BigDecimal Quotient, BigDecimal Modulus) DivMod(BigDecimal divident, BigDecimal divisor, int precision) => throw new NotImplementedException();
+
+    public BigDecimal Shift(int shift) => new (Mantissa, checked(Exponent + shift));
 
     public static BigDecimal operator +(BigDecimal value) => value;
-    public static BigDecimal operator ++(BigDecimal value) => value + 1;
-    public static BigDecimal operator -(BigDecimal value) => throw new NotImplementedException();
-    public static BigDecimal operator --(BigDecimal value) => value - 1;
+    public static BigDecimal operator ++(BigDecimal value) => value.Add(1);
+    public static BigDecimal operator -(BigDecimal value) => new (-value.Mantissa, value.Exponent);
+    public static BigDecimal operator --(BigDecimal value) => value.Subtract(1);
 
     public static bool operator ==(BigDecimal left, BigDecimal right) => left.Equals(right);
     public static bool operator !=(BigDecimal left, BigDecimal right) => !left.Equals(right);
@@ -70,4 +86,22 @@ public readonly partial struct BigDecimal
     public static bool operator >(BigDecimal left, BigDecimal right) => left.CompareTo(right) > 0;
     public static bool operator <=(BigDecimal left, BigDecimal right) => left.CompareTo(right) <= 0;
     public static bool operator >=(BigDecimal left, BigDecimal right) => left.CompareTo(right) >= 0;
+
+    public static BigDecimal operator <<(BigDecimal value, int shift) => value.Shift(shift);
+    public static BigDecimal operator >>(BigDecimal value, int shift) => value.Shift(-shift);
+
+    (BigInteger Mantissa1, BigInteger Mantissa2, int Exponent) Align(BigDecimal value)
+    {
+        var comparedExponents = Exponent.CompareTo(value.Exponent);
+        return comparedExponents == 0
+            ? (Mantissa, value.Mantissa, Exponent)
+            : comparedExponents < 0
+                ? (Mantissa, value.Mantissa * BigInteger.Pow(10, value.Exponent - Exponent), Exponent)
+                : (Mantissa * BigInteger.Pow(10, Exponent - value.Exponent), value.Mantissa, value.Exponent);
+    }
+
+    static BigInteger Shift(BigInteger mantissa, int shift) => shift < 0
+        ? mantissa / BigInteger.Pow(10, -shift)
+        : mantissa * BigInteger.Pow(10, shift);
+
 }
