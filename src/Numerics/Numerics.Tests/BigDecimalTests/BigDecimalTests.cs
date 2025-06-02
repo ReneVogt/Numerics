@@ -210,6 +210,14 @@ public sealed partial class BigDecimalTests
         Assert.Equal(7, sut.Exponent);
     }
 
+    [Fact]
+    [Trait("BigDecimal", "Construction")]
+    public void GetHashCode_DifferentForSomeCases()
+    {
+        Assert.NotEqual(BigDecimal.One.GetHashCode(), BigDecimal.Zero.GetHashCode());
+        Assert.NotEqual(BigDecimal.One.GetHashCode(), BigDecimal.NegativeOne.GetHashCode());
+        Assert.NotEqual(BigDecimal.Zero.GetHashCode(), BigDecimal.NegativeOne.GetHashCode());
+    }
     [Theory]
     [MemberData(nameof(ProvideDeconstructorTestCases))]
     [Trait("BigDecimal", "Construction")]

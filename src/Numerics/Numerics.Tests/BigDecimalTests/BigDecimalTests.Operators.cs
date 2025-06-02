@@ -192,4 +192,89 @@ public sealed partial class BigDecimalTests
         { new BigDecimal(123, 11), new BigDecimal(7, -6), new BigDecimal(861, 5)}
     };
     #endregion
+    #region Divide
+    [Theory]
+    [MemberData(nameof(ProvideDivisionByZeroTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void Division_ByZero_Throws(TestableBigDecimal divident)
+    {
+        Assert.Throws<DivideByZeroException>(() => divident.Value / BigDecimal.Zero);
+        Assert.Throws<DivideByZeroException>(() => divident.Value.DivideBy(BigDecimal.Zero));
+        Assert.Throws<DivideByZeroException>(() => divident.Value.DivideBy(BigDecimal.Zero, 10));
+        Assert.Throws<DivideByZeroException>(() => BigDecimal.DivRem(divident.Value, BigDecimal.Zero));
+        Assert.Throws<DivideByZeroException>(() => BigDecimal.DivRem(divident.Value, BigDecimal.Zero, 10));
+        Assert.Throws<DivideByZeroException>(() => divident.Value % BigDecimal.Zero);
+        Assert.Throws<DivideByZeroException>(() => divident.Value.ModulusBy(BigDecimal.Zero));
+    }
+    [Theory]
+    [MemberData(nameof(ProvideDivRemTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void DivRem_Precision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder, int precision)
+    {
+        var (q, m) = BigDecimal.DivRem(divident.Value, divisor.Value, precision);
+        Assert.Equal(quotient.Value, q);
+        Assert.Equal(remainder.Value, m);
+    }
+    [Theory]
+    [MemberData(nameof(ProvideDivRemTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void DivRem_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder, int precision)
+    {
+        BigDecimalContext.Precision = precision;
+        var (q, m) = BigDecimal.DivRem(divident.Value, divisor.Value);
+        Assert.Equal(quotient.Value, q);
+        Assert.Equal(remainder.Value, m);
+    }
+    [Theory]
+    [MemberData(nameof(ProvideDivisionTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void Division_Precision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
+        => Assert.Equal(quotient.Value, divident.Value.DivideBy(divisor.Value, precision));
+    [Theory]
+    [MemberData(nameof(ProvideDivisionTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void Division_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
+    {
+        BigDecimalContext.Precision = precision;
+        Assert.Equal(quotient.Value, divident.Value / divisor.Value);
+        Assert.Equal(quotient.Value, divident.Value.DivideBy(divisor.Value));
+    }
+    [Theory]
+    [MemberData(nameof(ProvideModulusTestCases))]
+    [Trait("BigDecimal", "Operators")]
+    public void Modulus_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal remainder)
+    {
+        Assert.Equal(remainder.Value, divident.Value % divisor.Value);
+        Assert.Equal(remainder.Value, divident.Value.ModulusBy(divisor.Value));
+    }
+    public static TheoryData<TestableBigDecimal> ProvideDivisionByZeroTestCases() => [.. ProvideDivRemTestCases().Select(n => (TestableBigDecimal)n[0])];
+    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int> ProvideDivisionTestCases()
+    {
+        var data = new TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int>();
+        foreach (var row in ProvideDivRemTestCases())
+            data.Add((TestableBigDecimal)row[0], (TestableBigDecimal)row[1], (TestableBigDecimal)row[2], (int)row[4]);
+        return data;
+    }
+    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal> ProvideModulusTestCases()
+    {
+        var data = new TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal>();
+        foreach (var row in ProvideDivRemTestCases())
+            data.Add((TestableBigDecimal)row[0], (TestableBigDecimal)row[1], (TestableBigDecimal)row[3]);
+        return data;
+    }
+    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int> ProvideDivRemTestCases() => new()
+    {
+        { BigDecimal.Zero, BigDecimal.One, BigDecimal.Zero, BigDecimal.Zero, 10},
+        { BigDecimal.Zero, BigDecimal.NegativeOne, BigDecimal.Zero, BigDecimal.Zero, 10 },
+        { BigDecimal.One, BigDecimal.One, BigDecimal.One, BigDecimal.Zero, 10 },
+        { BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.Zero, 10 },
+        { BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.Zero, 10 },
+        { BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.Zero, 10 },
+        { BigDecimal.One, new BigDecimal(2), new BigDecimal(5, -1), BigDecimal.One, 10 },
+
+        { new BigDecimal(7, 3), new BigDecimal(3), new BigDecimal(2333333, -3), BigDecimal.One, 3 },
+        { new BigDecimal(3, -2), new BigDecimal(2, -3), new BigDecimal(15), BigDecimal.Zero, 3 },
+        { new BigDecimal(-7, -1), new BigDecimal(3), new BigDecimal(-233, -3), new BigDecimal(-7, -1), 3 }
+    };
+    #endregion
 }
