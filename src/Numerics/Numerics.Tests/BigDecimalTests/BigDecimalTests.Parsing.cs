@@ -53,7 +53,15 @@ public sealed partial class BigDecimalTests
     public void Parsing_RoundTrip(TestableBigDecimal value) => Assert.Equal(value.Value, BigDecimal.Parse(value.Value.ToString()));
     public static TheoryData<TestableBigDecimal, string> ProvideValidParsingTestCases() => new()
     {
-        { BigDecimal.Zero, "0" }
+        { BigDecimal.Zero, "0" },
+        { BigDecimal.NegativeOne, "-1" },
+        { BigDecimal.One, "1" },
+        { new BigDecimal(213, 7123), "213 E+7123" },
+        { new BigDecimal(213, 7123), "213 E7123" },
+        { new BigDecimal(213, 7123), "213 E7123" },
+        { new BigDecimal(213, -7123), "213 E-7123" },
+        { new BigDecimal(-213, 7123), "-213 E7123" },
+        { new BigDecimal(-213, -7123), "-213 E-7123" }
     };
     public static TheoryData<string> ProvideInvalidParsingTestCases() =>
     [

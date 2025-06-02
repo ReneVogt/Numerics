@@ -77,7 +77,7 @@ public readonly partial struct BigDecimal
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
     {
         charsWritten = 0;
-        if (!MemoryExtensions.Equals(format, _expectedFormatSpecifier, StringComparison.Ordinal)) throw new FormatException();
+        if (format.Length > 0 && !MemoryExtensions.Equals(format, _expectedFormatSpecifier, StringComparison.Ordinal)) throw new FormatException();
 
         if (!Mantissa.TryFormat(destination, out charsWritten, _bigintFormatSpecifier, provider)) return false;
         if (Exponent == 0) return true;

@@ -36,7 +36,6 @@ public sealed partial class BigDecimalTests
     [Trait("BigDecimal", "Formatting")]
     public void TryFormat_WrongFormat_FormatException()
     {
-        Assert.Throws<FormatException>(() => BigDecimal.One.TryFormat(new char[256], out _, "", null));
         Assert.Throws<FormatException>(() => BigDecimal.One.TryFormat(new char[256], out _ , "N", null));
         Assert.Throws<FormatException>(() => BigDecimal.One.TryFormat(new char[256], out _ , "E02", null));
     }
@@ -56,6 +55,10 @@ public sealed partial class BigDecimalTests
         var buffer = new char[size];
         Assert.True(value.Value.TryFormat(buffer, out var written, "E", null));
         var result = new string(buffer[..written]);
+        Assert.Equal(expected, result);
+
+        Assert.True(value.Value.TryFormat(buffer, out written, string.Empty, null));
+        result = new string(buffer[..written]);
         Assert.Equal(expected, result);
     }
 

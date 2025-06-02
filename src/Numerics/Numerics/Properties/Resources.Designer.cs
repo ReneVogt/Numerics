@@ -68,5 +68,14 @@ namespace Revo.Numerics.Properties {
                 return ResourceManager.GetString("BigDecimal_InvalidCompareArgument", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A square root is not defined for a negative value like {0}. ähnelt.
+        /// </summary>
+        internal static string BigDecimal_Sqrt_ArgumentOutOfRange {
+            get {
+                return ResourceManager.GetString("BigDecimal_Sqrt_ArgumentOutOfRange", resourceCulture);
+            }
+        }
     }
 }

@@ -120,4 +120,7 @@
   <data name="BigDecimal_InvalidCompareArgument" xml:space="preserve">
     <value>{0} is not comparable to {1}.</value>
   </data>
+  <data name="BigDecimal_Sqrt_ArgumentOutOfRange" xml:space="preserve">
+    <value>A square root is not defined for a negative value like {0}.</value>
+  </data>
 </root>
