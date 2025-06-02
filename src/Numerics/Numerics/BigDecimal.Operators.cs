@@ -68,7 +68,7 @@ public readonly partial struct BigDecimal
     public BigDecimal DivideBy(BigDecimal divisor) => DivideBy(divisor, BigDecimalContext.Precision);
     public BigDecimal DivideBy(BigDecimal divisor, int precision)
     {
-        if (divisor == 0) throw new DivideByZeroException();
+        if (divisor.Mantissa.IsZero) throw new DivideByZeroException();
         var (m1, m2, _) = Align(divisor);
         m1 *= BigInteger.Pow(10, precision);
         return new BigDecimal(m1 / m2, -precision);
@@ -76,14 +76,14 @@ public readonly partial struct BigDecimal
     public static BigDecimal operator %(BigDecimal divident, BigDecimal divisor) => divident.ModulusBy(divisor);
     public BigDecimal ModulusBy(BigDecimal divisor)
     {
-        if (divisor == 0) throw new DivideByZeroException();
+        if (divisor.Mantissa.IsZero) throw new DivideByZeroException();
         var (m1, m2, e) = Align(divisor);
         return new BigDecimal(m1 % m2, e);
     }
     public static (BigDecimal Quotient, BigDecimal Remainder) DivRem(BigDecimal divident, BigDecimal divisor) => DivRem(divident, divisor, BigDecimalContext.Precision);
     public static (BigDecimal Quotient, BigDecimal Remainder) DivRem(BigDecimal divident, BigDecimal divisor, int precision)
     {
-        if (divisor == 0) throw new DivideByZeroException();
+        if (divisor.Mantissa.IsZero) throw new DivideByZeroException();
         var (m1, m2, e) = Align(divident, divisor);
         var remainder = new BigDecimal(m1 % m2, e);
         m1 *= BigInteger.Pow(10, precision);

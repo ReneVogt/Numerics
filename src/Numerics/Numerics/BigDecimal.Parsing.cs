@@ -47,13 +47,19 @@ public readonly partial struct BigDecimal
     }
     /// <inheritdoc/>
     public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, [MaybeNullWhen(false)] out BigDecimal result)
-        => TryParse(s.AsSpan(), style, provider, out result);
+    {
+        result = default;
+        return s is not null && TryParse(s.AsSpan(), style, provider, out result);
+    }
     /// <inheritdoc/>
     public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, [MaybeNullWhen(false)] out BigDecimal result)
         => TryParse(s, _defaultNumberStyles, provider, out result);
     /// <inheritdoc/>
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out BigDecimal result)
-        => TryParse(s.AsSpan(), _defaultNumberStyles, provider, out result);
+    {
+        result = default;
+        return s is not null && TryParse(s.AsSpan(), _defaultNumberStyles, provider, out result);
+    }
     /// <summary>
     /// Tries to parse a string into a <see cref="BigDecimal"/>.
     /// </summary>
@@ -62,7 +68,10 @@ public readonly partial struct BigDecimal
     /// undefined value on failure.</param>
     /// <returns><c>true</c> if s was successfully parsed; otherwise, <c>false</c>.</returns>
     public static bool TryParse([NotNullWhen(true)] string? s, [MaybeNullWhen(false)] out BigDecimal result)
-        => TryParse(s.AsSpan(), _defaultNumberStyles, null, out result);
+    {
+        result = default;
+        return s is not null && TryParse(s.AsSpan(), _defaultNumberStyles, null, out result);
+    }
 
     /// <inheritdoc/>
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
@@ -81,8 +90,12 @@ public readonly partial struct BigDecimal
         destination[charsWritten++] = ' ';
         destination[charsWritten++] = 'E';
 
-        if (!Exponent.TryFormat(destination[(charsWritten-1)..], out var exponentChars, _bigintFormatSpecifier, provider))
+        if (!Exponent.TryFormat(destination[charsWritten..], out var exponentChars, _bigintFormatSpecifier, provider))
+        {
+            charsWritten = 0;
             return false;
+        }
+
         charsWritten += exponentChars;
         return true;
     }

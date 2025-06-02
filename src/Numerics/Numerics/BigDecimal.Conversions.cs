@@ -326,7 +326,6 @@ public readonly partial struct BigDecimal
     public static object? TryConvertToBigIntegerChecked(BigDecimal value)
     {
         if (value.Exponent < 0) return null;
-        if (value.Exponent > int.MaxValue) return null;
         return Shift(value.Mantissa, value.Exponent);
     }
     public static object? TryConvertToBigIntegerSaturating(BigDecimal value) => TryConvertToBigIntegerChecked(value);
