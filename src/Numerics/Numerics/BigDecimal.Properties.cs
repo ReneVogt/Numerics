@@ -57,9 +57,10 @@ public readonly partial struct BigDecimal
     /// <inheritdoc/>
     public static bool IsInteger(BigDecimal value) => value.Exponent >= 0;
     /// <inheritdoc/>
-    public static bool IsEvenInteger(BigDecimal value) => IsInteger(value) && value.Mantissa.IsEven;
+    public static bool IsEvenInteger(BigDecimal value) 
+        => value.Exponent > 0 || value.Exponent == 0 && value.Mantissa.IsEven;
     /// <inheritdoc/>
-    public static bool IsOddInteger(BigDecimal value) => IsInteger(value) && !value.Mantissa.IsEven;
+    public static bool IsOddInteger(BigDecimal value) => value.Exponent == 0 && !value.Mantissa.IsEven;
 
     /// <inheritdoc/>
     public static bool IsCanonical(BigDecimal value) => true;

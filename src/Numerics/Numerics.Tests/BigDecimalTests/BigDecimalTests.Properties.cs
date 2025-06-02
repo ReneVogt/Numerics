@@ -149,6 +149,18 @@ public sealed partial class BigDecimalTests
     public void IsEvenInteger_NegativeOddInt_False() => Assert.False(BigDecimal.IsEvenInteger(-125));
     [Fact]
     [Trait("BigDecimal", "Properties")]
+    public void IsEvenInteger_PostiveLargeEvenInt_True() => Assert.True(BigDecimal.IsEvenInteger(123000));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsEvenInteger_PostiveLargeOddInt_False() => Assert.False(BigDecimal.IsEvenInteger(125001));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsEvenInteger_NegativeLargeEvenInt_True() => Assert.True(BigDecimal.IsEvenInteger(-123000));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsEvenInteger_NegativeLargeOddInt_False() => Assert.False(BigDecimal.IsEvenInteger(-125001));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
     public void IsEvenInteger_PositiveFraction_False() => Assert.False(BigDecimal.IsEvenInteger(124.2m));
     [Fact]
     [Trait("BigDecimal", "Properties")]
@@ -171,10 +183,23 @@ public sealed partial class BigDecimalTests
     public void IsOddInteger_NegativeOddInt_True() => Assert.True(BigDecimal.IsOddInteger(-125));
     [Fact]
     [Trait("BigDecimal", "Properties")]
+    public void IsOddInteger_PostiveLargeOddInt_True() => Assert.True(BigDecimal.IsOddInteger(123001));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsOddInteger_PostiveLargeEventInt_False() => Assert.False(BigDecimal.IsOddInteger(123000));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsOddInteger_NegativeLargeEvenInt_False() => Assert.False(BigDecimal.IsOddInteger(-123000));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
+    public void IsOddInteger_NegativeLargeOddInt_True() => Assert.True(BigDecimal.IsOddInteger(-125001));
+    [Fact]
+    [Trait("BigDecimal", "Properties")]
     public void IsOddInteger_PositiveFraction_False() => Assert.False(BigDecimal.IsOddInteger(124.2m));
     [Fact]
     [Trait("BigDecimal", "Properties")]
     public void IsOddInteger_NegativeFraction_False() => Assert.False(BigDecimal.IsOddInteger(-124.2m));
+
 
     [Theory]
     [MemberData(nameof(ProvideSimplePropertyTestData))]
