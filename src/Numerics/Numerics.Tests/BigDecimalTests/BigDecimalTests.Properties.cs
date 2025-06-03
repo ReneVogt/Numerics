@@ -277,4 +277,52 @@ public sealed partial class BigDecimalTests
         { new BigDecimal(10), new BigDecimal(-20)},
         { new BigDecimal(-0.5m), new BigDecimal(-0.7m)},
     };
+
+    [Theory]
+    [InlineData(0, 0, 1)]
+    [InlineData(1, 0, 1)]
+    [InlineData(-1, 0, 1)]
+    [InlineData(1230, 27, 3)]
+    [InlineData(-567, 12, 3)]
+    [InlineData(17, -2, 2)]
+    [InlineData(-1234, -39, 4)]
+    [Trait("BigDecimal", "Properties")]
+    public void NumberOfDigits(int mantissa, int exponent, int expected) 
+        => Assert.Equal(expected, new BigDecimal(mantissa, exponent).NumberOfDigits);
+
+    [Theory]
+    [MemberData(nameof(ProvideIntegralDigitsTestCases))]
+    [Trait("BigDecimal", "Properties")]
+    public void EnumerateIntegralDigits(TestableBigDecimal value, int[] digits) 
+        => Assert.Equal(digits, value.Value.EnumerateIntegralDigits());
+    public static TheoryData<TestableBigDecimal, int[]> ProvideIntegralDigitsTestCases() => new()
+    {
+        { BigDecimal.Zero, [0] },
+        { BigDecimal.One, [1] },
+        { BigDecimal.NegativeOne, [1] },
+
+        { new BigDecimal(12), [2, 1] },
+        { new BigDecimal(1234, -2), [2, 1] },
+        { new BigDecimal(1234, -1), [3, 2, 1] },
+        { new BigDecimal(1234, 5), [0, 0, 0, 0, 0, 4, 3, 2, 1] },
+        { new BigDecimal(1234, -5), [0] },
+    };
+    [Theory]
+    [MemberData(nameof(ProvideFractionalDigitsTestCases))]
+    [Trait("BigDecimal", "Properties")]
+    public void EnumerateFractionalDigits(TestableBigDecimal value, int[] digits)
+        => Assert.Equal(digits, value.Value.EnumerateFractionalDigits());
+    public static TheoryData<TestableBigDecimal, int[]> ProvideFractionalDigitsTestCases() => new()
+    {
+        { BigDecimal.Zero, [] },
+        { BigDecimal.One, [] },
+        { BigDecimal.NegativeOne, [] },
+
+        { new BigDecimal(12), [] },
+        { new BigDecimal(1, 12), [] },
+
+        { new BigDecimal(1234, -1), [4] },
+        { new BigDecimal(1234, -5), [0, 1, 2, 3, 4] },
+        { new BigDecimal(1234, -4), [1, 2, 3, 4] },
+    };
 }

@@ -95,4 +95,44 @@ public readonly partial struct BigDecimal
     public static BigDecimal MinMagnitude(BigDecimal x, BigDecimal y) => Abs(x) < Abs(y) ? x : y;
     /// <inheritdoc/>
     public static BigDecimal MinMagnitudeNumber(BigDecimal x, BigDecimal y) => MinMagnitude(x, y);
+
+    /// <summary>
+    /// Gets the number of digits in the mantissa.
+    /// </summary>
+    public int NumberOfDigits => GetNumberOfDigits(Mantissa);
+    static int GetNumberOfDigits(BigInteger i) => i.IsZero ? 1 : (int)BigInteger.Log10(BigInteger.Abs(i))+1;
+
+    public IEnumerable<int> EnumerateIntegralDigits()
+    {
+        if (Mantissa.IsZero)
+        {
+            yield return 0;
+            yield break;
+        }
+
+        var m = Shift(BigInteger.Abs(Mantissa), Exponent);
+        if (m.IsZero)
+        {
+            yield return 0;
+            yield break;
+        }
+        while(!m.IsZero)
+        {
+            (m, var r) = BigInteger.DivRem(m, 10);
+            yield return (int)r;
+        }
+    }
+    public IEnumerable<int> EnumerateFractionalDigits()
+    {
+        if (Exponent >= 0) yield break;        
+        var m = Shift(1, -Exponent);
+        var r = BigInteger.Remainder(BigInteger.Abs(Mantissa), m);
+        m /= 10;
+        while(m > 0)
+        {
+            (var d, r) = BigInteger.DivRem(r, m);
+            yield return (int)d;
+            m /= 10;
+        }
+    }
 }

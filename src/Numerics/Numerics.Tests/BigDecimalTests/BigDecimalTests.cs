@@ -229,8 +229,8 @@ public sealed partial class BigDecimalTests
         Assert.Equal(value.Value.Exponent, exponent);
     }
 
-    public static TheoryData<TestableBigDecimal> ProvideDeconstructorTestCases() => new()
-    {
+    public static TheoryData<TestableBigDecimal> ProvideDeconstructorTestCases() =>
+    [
         new BigDecimal(-12, -30),
         new BigDecimal(-12, 31),
         new BigDecimal(17, -1),
@@ -238,7 +238,7 @@ public sealed partial class BigDecimalTests
         BigDecimal.One,
         BigDecimal.Zero,
         BigDecimal.NegativeOne
-    };
+    ];
 
     public sealed class TestableBigDecimal(BigDecimal value) : IXunitSerializable
     {
