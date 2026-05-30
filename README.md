@@ -5,4 +5,4 @@
 No, currently this repo only contains an implementation of a BigDecimal struct for .NET.
 
 ---
-René Vogt, June 2025
+René Vogt, June 2026
