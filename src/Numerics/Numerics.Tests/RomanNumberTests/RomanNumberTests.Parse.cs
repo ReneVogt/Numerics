@@ -73,12 +73,35 @@ public sealed partial class RomanNumberTests
             ["IX"] = 9,
         };
 
-        var tens = ones.Select(
-            kvp => (key: kvp.Key.Replace('I', 'X').Replace('V', 'L'), value: kvp.Value * 10)).DistinctBy(kvp => kvp.key).ToDictionary(kvp => kvp.key, kvp => kvp.value); ;
+        var tens = new Dictionary<string, int>
+        {
+            ["X"] = 10,
+            ["XX"] = 20,
+            ["XXX"] = 30,
+            ["XXXX"] = 40,
+            ["XL"] = 40,
+            ["L"] = 50,
+            ["LX"] = 60,
+            ["LXX"] = 70,
+            ["LXXX"] = 80,
+            ["LXXXX"] = 90,
+            ["XC"] = 90,
+        };
 
-        var hundreds = ones.ToDictionary(
-            kvp => kvp.Key.Replace('I', 'C').Replace('V', 'D'),
-            kvp => kvp.Value * 100);
+        var hundreds = new Dictionary<string, int>
+        {
+            ["C"] = 100,
+            ["CC"] = 200,
+            ["CCC"] = 300,
+            ["CCCC"] = 400,
+            ["CD"] = 400,
+            ["D"] = 500,
+            ["DC"] = 600,
+            ["DCC"] = 700,
+            ["DCCC"] = 800,
+            ["DCCCC"] = 900,
+            ["CM"] = 900,
+        };
 
         var thousands = Enumerable.Range(0, 2)
             .ToDictionary(n => new string('M', n), n => n * 1000);

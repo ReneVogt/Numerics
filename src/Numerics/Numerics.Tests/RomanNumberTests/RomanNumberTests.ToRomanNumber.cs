@@ -6,6 +6,9 @@ public sealed partial class RomanNumberTests
 {
     [Fact]
     public void ToRomanNumber_ThrowsOnZero() => Assert.Throws<ArgumentOutOfRangeException>(() => RomanNumber.ToRomanNumber(0));
+    [Fact]
+    public void ToRomanNumber_ThrowsOnNegative() => Assert.Throws<ArgumentOutOfRangeException>(() => RomanNumber.ToRomanNumber(-1));
+
     [Theory]
     [
         InlineData(1, "I"),
@@ -40,6 +43,6 @@ public sealed partial class RomanNumberTests
         InlineData(3339, "MMMCCCXXXIX"),
         InlineData(27891, "MMMMMMMMMMMMMMMMMMMMMMMMMMMDCCCXCI")
     ]
-    public void ToRomanNumber_CorrectRepresentation(ushort number, string expected) => Assert.Equal(expected, number.ToRomanNumber());
+    public void ToRomanNumber_CorrectRepresentation(int number, string expected) => Assert.Equal(expected, number.ToRomanNumber());
 
 }
