@@ -13,6 +13,7 @@
 		<RepositoryUrl>https://github.com/ReneVogt/Numerics.git</RepositoryUrl>
 		<NeutralLanguage>en</NeutralLanguage>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<Version>1.1.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
