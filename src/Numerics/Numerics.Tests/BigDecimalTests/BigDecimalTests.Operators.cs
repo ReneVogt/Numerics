@@ -196,65 +196,68 @@ public sealed partial class BigDecimalTests
     [Theory]
     [MemberData(nameof(ProvideDivisionByZeroTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void Division_ByZero_Throws(TestableBigDecimal divident)
+    public void Division_ByZero_Throws(TestableBigDecimal dividend)
     {
-        Assert.Throws<DivideByZeroException>(() => divident.Value / BigDecimal.Zero);
-        Assert.Throws<DivideByZeroException>(() => divident.Value.DivideBy(BigDecimal.Zero));
-        Assert.Throws<DivideByZeroException>(() => divident.Value.DivideBy(BigDecimal.Zero, 10));
-        Assert.Throws<DivideByZeroException>(() => BigDecimal.DivRem(divident.Value, BigDecimal.Zero));
-        Assert.Throws<DivideByZeroException>(() => BigDecimal.DivRem(divident.Value, BigDecimal.Zero, 10));
-        Assert.Throws<DivideByZeroException>(() => divident.Value % BigDecimal.Zero);
-        Assert.Throws<DivideByZeroException>(() => divident.Value.ModulusBy(BigDecimal.Zero));
+        Assert.Throws<DivideByZeroException>(() => dividend.Value / BigDecimal.Zero);
+        Assert.Throws<DivideByZeroException>(() => dividend.Value.DivideBy(BigDecimal.Zero));
+        Assert.Throws<DivideByZeroException>(() => dividend.Value.DivideBy(BigDecimal.Zero, 10));
+        Assert.Throws<DivideByZeroException>(() => BigDecimal.DivRem(dividend.Value, BigDecimal.Zero));
+        Assert.Throws<DivideByZeroException>(() => dividend.Value % BigDecimal.Zero);
+        Assert.Throws<DivideByZeroException>(() => dividend.Value.ModulusBy(BigDecimal.Zero));
     }
     [Theory]
     [MemberData(nameof(ProvideDivRemTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void DivRem_Precision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder, int precision)
+    public void DivRem(TestableBigDecimal dividend, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder)
     {
-        var (q, m) = BigDecimal.DivRem(divident.Value, divisor.Value, precision);
+        var (q, m) = BigDecimal.DivRem(dividend.Value, divisor.Value);
         Assert.Equal(quotient.Value, q);
         Assert.Equal(remainder.Value, m);
     }
     [Theory]
     [MemberData(nameof(ProvideDivRemTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void DivRem_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder, int precision)
+    public void DivRem_QuotientAndRemainderRecomposeDividend(TestableBigDecimal dividend, TestableBigDecimal divisor, TestableBigDecimal quotient, TestableBigDecimal remainder)
     {
-        BigDecimalContext.Precision = precision;
-        var (q, m) = BigDecimal.DivRem(divident.Value, divisor.Value);
-        Assert.Equal(quotient.Value, q);
-        Assert.Equal(remainder.Value, m);
+        Assert.Equal(dividend.Value, quotient.Value * divisor.Value + remainder.Value);
     }
     [Theory]
     [MemberData(nameof(ProvideDivisionTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void Division_Precision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
-        => Assert.Equal(quotient.Value, divident.Value.DivideBy(divisor.Value, precision));
+    public void Division_Precision(TestableBigDecimal dividend, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
+        => Assert.Equal(quotient.Value, dividend.Value.DivideBy(divisor.Value, precision));
     [Theory]
     [MemberData(nameof(ProvideDivisionTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void Division_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
+    public void Division_GlobalPrecision(TestableBigDecimal dividend, TestableBigDecimal divisor, TestableBigDecimal quotient, int precision)
     {
         BigDecimalContext.Precision = precision;
-        Assert.Equal(quotient.Value, divident.Value / divisor.Value);
-        Assert.Equal(quotient.Value, divident.Value.DivideBy(divisor.Value));
+        Assert.Equal(quotient.Value, dividend.Value / divisor.Value);
+        Assert.Equal(quotient.Value, dividend.Value.DivideBy(divisor.Value));
     }
     [Theory]
     [MemberData(nameof(ProvideModulusTestCases))]
     [Trait("BigDecimal", "Operators")]
-    public void Modulus_GlobalPrecision(TestableBigDecimal divident, TestableBigDecimal divisor, TestableBigDecimal remainder)
+    public void Modulus_GlobalPrecision(TestableBigDecimal dividend, TestableBigDecimal divisor, TestableBigDecimal remainder)
     {
-        Assert.Equal(remainder.Value, divident.Value % divisor.Value);
-        Assert.Equal(remainder.Value, divident.Value.ModulusBy(divisor.Value));
+        Assert.Equal(remainder.Value, dividend.Value % divisor.Value);
+        Assert.Equal(remainder.Value, dividend.Value.ModulusBy(divisor.Value));
     }
     public static TheoryData<TestableBigDecimal> ProvideDivisionByZeroTestCases() => [.. ProvideDivRemTestCases().Select(n => (TestableBigDecimal)n[0])];
-    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int> ProvideDivisionTestCases()
+    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int> ProvideDivisionTestCases() => new()
     {
-        var data = new TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int>();
-        foreach (var row in ProvideDivRemTestCases())
-            data.Add((TestableBigDecimal)row[0], (TestableBigDecimal)row[1], (TestableBigDecimal)row[2], (int)row[4]);
-        return data;
-    }
+        { BigDecimal.Zero, BigDecimal.One, BigDecimal.Zero, 10},
+        { BigDecimal.Zero, BigDecimal.NegativeOne, BigDecimal.Zero, 10 },
+        { BigDecimal.One, BigDecimal.One, BigDecimal.One, 10 },
+        { BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.NegativeOne, 10 },
+        { BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.NegativeOne, 10 },
+        { BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.One, 10 },
+        { BigDecimal.One, new BigDecimal(2), new BigDecimal(5, -1), 10 },
+
+        { new BigDecimal(7, 3), new BigDecimal(3), new BigDecimal(2333333, -3), 3 },
+        { new BigDecimal(3, -2), new BigDecimal(2, -3), new BigDecimal(15), 3 },
+        { new BigDecimal(-7, -1), new BigDecimal(3), new BigDecimal(-233, -3), 3 }
+    };
     public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal> ProvideModulusTestCases()
     {
         var data = new TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal>();
@@ -262,19 +265,20 @@ public sealed partial class BigDecimalTests
             data.Add((TestableBigDecimal)row[0], (TestableBigDecimal)row[1], (TestableBigDecimal)row[3]);
         return data;
     }
-    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, int> ProvideDivRemTestCases() => new()
+    public static TheoryData<TestableBigDecimal, TestableBigDecimal, TestableBigDecimal, TestableBigDecimal> ProvideDivRemTestCases() => new()
     {
-        { BigDecimal.Zero, BigDecimal.One, BigDecimal.Zero, BigDecimal.Zero, 10},
-        { BigDecimal.Zero, BigDecimal.NegativeOne, BigDecimal.Zero, BigDecimal.Zero, 10 },
-        { BigDecimal.One, BigDecimal.One, BigDecimal.One, BigDecimal.Zero, 10 },
-        { BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.Zero, 10 },
-        { BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.Zero, 10 },
-        { BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.Zero, 10 },
-        { BigDecimal.One, new BigDecimal(2), new BigDecimal(5, -1), BigDecimal.One, 10 },
+        { BigDecimal.Zero, BigDecimal.One, BigDecimal.Zero, BigDecimal.Zero},
+        { BigDecimal.Zero, BigDecimal.NegativeOne, BigDecimal.Zero, BigDecimal.Zero },
+        { BigDecimal.One, BigDecimal.One, BigDecimal.One, BigDecimal.Zero },
+        { BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.Zero },
+        { BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.NegativeOne, BigDecimal.Zero },
+        { BigDecimal.NegativeOne, BigDecimal.NegativeOne, BigDecimal.One, BigDecimal.Zero },
+        { BigDecimal.One, new BigDecimal(2), BigDecimal.Zero, BigDecimal.One },
 
-        { new BigDecimal(7, 3), new BigDecimal(3), new BigDecimal(2333333, -3), BigDecimal.One, 3 },
-        { new BigDecimal(3, -2), new BigDecimal(2, -3), new BigDecimal(15), BigDecimal.Zero, 3 },
-        { new BigDecimal(-7, -1), new BigDecimal(3), new BigDecimal(-233, -3), new BigDecimal(-7, -1), 3 }
+        { new BigDecimal(7, 3), new BigDecimal(3), new BigDecimal(2333), BigDecimal.One },
+        { new BigDecimal(3, -2), new BigDecimal(2, -3), new BigDecimal(15), BigDecimal.Zero },
+        { new BigDecimal(-7, -1), new BigDecimal(3), BigDecimal.Zero, new BigDecimal(-7, -1) },
+        { new BigDecimal(7), new BigDecimal(3, -1), new BigDecimal(23), new BigDecimal(1, -1) }
     };
     #endregion
 }

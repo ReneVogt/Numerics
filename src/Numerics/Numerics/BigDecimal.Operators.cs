@@ -64,7 +64,7 @@ public readonly partial struct BigDecimal
         var (m1, m2, e) = Align(factor);
         return new(m1 * m2, 2 * e);
     }
-    public static BigDecimal operator /(BigDecimal divident, BigDecimal divisor) => divident.DivideBy(divisor);
+    public static BigDecimal operator /(BigDecimal dividend, BigDecimal divisor) => dividend.DivideBy(divisor);
     public BigDecimal DivideBy(BigDecimal divisor) => DivideBy(divisor, BigDecimalContext.Precision);
     public BigDecimal DivideBy(BigDecimal divisor, int precision)
     {
@@ -73,21 +73,18 @@ public readonly partial struct BigDecimal
         m1 *= BigInteger.Pow(10, precision);
         return new BigDecimal(m1 / m2, -precision);
     }
-    public static BigDecimal operator %(BigDecimal divident, BigDecimal divisor) => divident.ModulusBy(divisor);
+    public static BigDecimal operator %(BigDecimal dividend, BigDecimal divisor) => dividend.ModulusBy(divisor);
     public BigDecimal ModulusBy(BigDecimal divisor)
     {
         if (divisor.Mantissa.IsZero) throw new DivideByZeroException();
         var (m1, m2, e) = Align(divisor);
         return new BigDecimal(m1 % m2, e);
     }
-    public static (BigDecimal Quotient, BigDecimal Remainder) DivRem(BigDecimal divident, BigDecimal divisor) => DivRem(divident, divisor, BigDecimalContext.Precision);
-    public static (BigDecimal Quotient, BigDecimal Remainder) DivRem(BigDecimal divident, BigDecimal divisor, int precision)
+    public static (BigDecimal Quotient, BigDecimal Remainder) DivRem(BigDecimal dividend, BigDecimal divisor)
     {
         if (divisor.Mantissa.IsZero) throw new DivideByZeroException();
-        var (m1, m2, e) = Align(divident, divisor);
-        var remainder = new BigDecimal(m1 % m2, e);
-        m1 *= BigInteger.Pow(10, precision);
-        return (new BigDecimal(m1 / m2, -precision), remainder);
+        var (m1, m2, e) = Align(dividend, divisor);
+        return (new BigDecimal(m1 / m2), new BigDecimal(m1 % m2, e));
     }
 
     public BigDecimal Shift(int shift) => new (Mantissa, checked(Exponent + shift));
