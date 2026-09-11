@@ -1,4 +1,5 @@
 ﻿using Revo.Numerics.Properties;
+using Revo.Numerics.Types;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -60,6 +61,12 @@ public readonly partial struct BigDecimal
     }
 
     /// <summary>
+    /// Calculates the square root of the given <see cref="BigDecimal"/> using the current context precision.
+    /// </summary>
+    /// <param name="value">The <see cref="BigDecimal"/> value to calculate the square root of.</param>
+    /// <returns>The square root of the given <paramref name="value"/> truncated at the current context precision.</returns>
+    public static BigDecimal Sqrt(BigDecimal value) => Sqrt(value, BigDecimalContext.Precision);
+    /// <summary>
     /// Calculates the square root of the given
     /// <see cref="BigDecimal"/> using up to <paramref name="precision"/>
     /// decimal digits.
@@ -67,17 +74,7 @@ public readonly partial struct BigDecimal
     /// <param name="value">The <see cref="BigDecimal"/> value to calculate the square root of.</param>
     /// <param name="precision">The number of decimal digits to generate.</param>
     /// <returns>The square root of the given <paramref name="value"/> truncated at
-    /// <paramref name="precision"/> decimal digits.</returns>.
-    public static BigDecimal Sqrt(BigDecimal value) => Sqrt(value, BigDecimalContext.Precision);
-    /// <summary>
-    /// Calculates the square root of the given
-    /// <see cref="BigDecimal"/> using up to <paramref name="precision"/>#
-    /// decimal digits.
-    /// </summary>
-    /// <param name="value">The <see cref="BigDecimal"/> value to calculate the square root of.</param>
-    /// <param name="precision">The number of decimal digits to generate.</param>
-    /// <returns>The square root of the given <paramref name="value"/> truncated at
-    /// <paramref name="precision"/> decimal digits.</returns>.
+    /// <paramref name="precision"/> decimal digits.</returns>
     public static BigDecimal Sqrt(BigDecimal value, int precision)
     {
         if (value.Mantissa < 0)

@@ -1,4 +1,4 @@
-﻿namespace Revo.Numerics;
+﻿namespace Revo.Numerics.Types;
 
 /// <summary>
 /// Defines behaviour (precision) of

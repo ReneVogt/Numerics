@@ -1,4 +1,5 @@
 ﻿using Revo.Numerics.Properties;
+using Revo.Numerics.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 

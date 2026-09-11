@@ -1,4 +1,4 @@
-﻿namespace Revo.Numerics;
+﻿namespace Revo.Numerics.Types;
 
 [Flags]
 public enum RomanParseOptions

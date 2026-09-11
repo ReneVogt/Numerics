@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Revo.Numerics;
+namespace Revo.Numerics.Types;
 
 public static class RomanNumber
 {

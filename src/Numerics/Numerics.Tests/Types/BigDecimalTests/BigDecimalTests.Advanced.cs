@@ -1,4 +1,5 @@
 ﻿using Revo.Numerics;
+using Revo.Numerics.Types;
 using System.Numerics;
 
 namespace Numerics.Tests.BigDecimalTests;

@@ -1,4 +1,4 @@
-﻿using Revo.Numerics;
+﻿using Revo.Numerics.Types;
 
 namespace Numerics.Tests.RomanNumberTests;
 
