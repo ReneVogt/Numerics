@@ -9,6 +9,7 @@ A collection of numeric data structures and operations for .NET.
 | **BigDecimal** | An immutable decimal number with an arbitrarily large integer mantissa, decimal arithmetic, and configurable precision for division and square roots. Implements .NET generic math interfaces. | [BigDecimal guide](doc/BigDecimal.md) |
 | **RomanNumber** | Converts positive integers to Roman numerals and parses Roman numerals, with options for subtractive and additive notation. | [RomanNumber guide](doc/RomanNumber.md) |
 | **LinearSolver** | Solves square linear equation systems using LU decomposition with complete pivoting. Supports reusing a factorization for multiple right-hand sides. | [LinearSolver guide](doc/LinearSolver.md) |
+| **NewtonPolynomInterpolator** | Interpolates points using Newton divided differences and returns monomial coefficients in ascending order of power. | [NewtonPolynomInterpolator guide](doc/NewtonPolynomInterpolator.md) |
 
 ## Getting started
 
@@ -26,6 +27,7 @@ The guides contain C# examples, API summaries, and notes on supported inputs and
 using Revo.Numerics;         // BigDecimal
 using Revo.Numerics.Types;   // BigDecimalContext, RomanNumber, RomanParseOptions
 using Revo.Numerics.Solvers; // LinearSolver and related types
+using Revo.Numerics.Interpolation; // NewtonPolynomInterpolator, IPolynomInterpolator
 ```
 
 ## Build and test
