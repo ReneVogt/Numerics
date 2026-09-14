@@ -1,4 +1,4 @@
-﻿using Revo.Numerics;
+﻿using Revo.Numerics.Types;
 using System.Numerics;
 using Xunit.Abstractions;
 

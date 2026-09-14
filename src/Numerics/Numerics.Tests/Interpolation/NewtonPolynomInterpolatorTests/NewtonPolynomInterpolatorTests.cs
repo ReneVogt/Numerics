@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Revo.Numerics.Interpolation;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Numerics.Tests.Interpolation.NewtonPolynomInterpolatorTests;
@@ -31,17 +32,19 @@ public sealed partial class NewtonPolynomInterpolatorTests
         var ys = MatrixSplitRegex().Split(y).Select(s => double.Parse(s, CultureInfo.InvariantCulture)).ToArray();
         var expected = MatrixSplitRegex().Split(coefficients).Select(s => double.Parse(s, CultureInfo.InvariantCulture)).ToArray();
 
-        var solution = Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(xs, ys);
+        var interpolator = Interpolators.InterpolateNewtonPolynom(xs, ys);
+        var solution = interpolator.Coefficients;
         Assert.Equal(xs.Length, solution.Length);
         for (var i = 0; i < expected.Length; i++)
             AssertClose(expected[i], solution[i]);
-        Validate(xs, ys, solution);
+        Validate(xs, ys, interpolator);
     }
 
     [Fact]
-    public void Interpolate_EmptyArrays_ReturnsEmptyArray()
+    public void Interpolate_EmptyArrays_ThrowsArgumentException()
     {
-        Assert.Empty(Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate([], []));
+        Assert.Throws<ArgumentException>(() =>
+            Interpolators.InterpolateNewtonPolynom([], []));
     }
 
     [Theory]
@@ -50,7 +53,7 @@ public sealed partial class NewtonPolynomInterpolatorTests
     public void Interpolate_NullArray_ThrowsArgumentNullException(bool nullX)
     {
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(
+            Interpolators.InterpolateNewtonPolynom(
                 nullX ? null! : [], nullX ? [] : null!));
 
         Assert.Equal(nullX ? "x" : "y", exception.ParamName);
@@ -64,7 +67,7 @@ public sealed partial class NewtonPolynomInterpolatorTests
     public void Interpolate_DifferentLengths_ThrowsArgumentException(int xLength, int yLength)
     {
         Assert.Throws<ArgumentException>(() =>
-            Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(new double[xLength], new double[yLength]));
+            Interpolators.InterpolateNewtonPolynom(new double[xLength], new double[yLength]));
     }
 
     [Theory]
@@ -79,7 +82,7 @@ public sealed partial class NewtonPolynomInterpolatorTests
         var ys = MatrixSplitRegex().Split(y).Select(s => double.Parse(s, CultureInfo.InvariantCulture)).ToArray();
 
         Assert.Throws<ArgumentException>(() =>
-            Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(xs, ys));
+            Interpolators.InterpolateNewtonPolynom(xs, ys));
     }
 
     [Theory]
@@ -89,10 +92,10 @@ public sealed partial class NewtonPolynomInterpolatorTests
     [InlineData(4.0)]
     public void Interpolate_CubicPolynomial_EvaluatesBetweenAndBeyondNodes(double x)
     {
-        var solution = Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(
+        var interpolator = Interpolators.InterpolateNewtonPolynom(
             [-2, -0.5, 1, 3], [0, 1.125, 9, 65]);
 
-        AssertClose(x * x * x + 3 * x * x + 3 * x + 2, Evaluate(solution, x));
+        AssertClose(x * x * x + 3 * x * x + 3 * x + 2, interpolator.Evaluate(x));
     }
 
     [Theory]
@@ -107,16 +110,45 @@ public sealed partial class NewtonPolynomInterpolatorTests
         var originalX = xs.ToArray();
         var originalY = ys.ToArray();
 
-        var solution = Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(xs, ys);
+        var interpolator = Interpolators.InterpolateNewtonPolynom(xs, ys);
 
         Assert.Equal(originalX, xs);
         Assert.Equal(originalY, ys);
-        Assert.NotSame(xs, solution);
-        Assert.NotSame(ys, solution);
-        var originalSolution = solution.ToArray();
+        Assert.NotSame(xs, interpolator.Coefficients);
+        Assert.NotSame(ys, interpolator.Coefficients);
+        var originalSolution = interpolator.Coefficients.ToArray();
         xs[0] = 100;
         ys[0] = 200;
-        Assert.Equal(originalSolution, solution);
+        Assert.Equal(originalSolution, interpolator.Coefficients);
+        AssertClose(count == 1 ? 0 : 2.25, interpolator.Evaluate(2.5));
+    }
+
+    [Fact]
+    public void Coefficients_ReturnsIndependentCopies_WithoutChangingEvaluation()
+    {
+        var interpolator = Interpolators.InterpolateNewtonPolynom([1, 2, 3], [0, 1, 4]);
+        var first = interpolator.Coefficients;
+        var second = interpolator.Coefficients;
+
+        Assert.NotSame(first, second);
+        first[0] = 100;
+        second[1] = 200;
+
+        Assert.Equal([100, -2, 1], first);
+        Assert.Equal([1, 200, 1], second);
+        Assert.Equal([1, -2, 1], interpolator.Coefficients);
+        AssertClose(2.25, interpolator.Evaluate(2.5));
+    }
+
+    [Theory]
+    [InlineData(-10)]
+    [InlineData(0)]
+    [InlineData(4.5)]
+    public void Interpolate_SinglePoint_EvaluatesConstantAwayFromNode(double x)
+    {
+        var interpolator = Interpolators.InterpolateNewtonPolynom([-3], [7]);
+
+        Assert.Equal(7, interpolator.Evaluate(x));
     }
 
     [Fact]
@@ -124,24 +156,16 @@ public sealed partial class NewtonPolynomInterpolatorTests
     {
         double[] points = [-2, 1, 3];
 
-        var solution = Revo.Numerics.Interpolation.NewtonPolynomInterpolator.Interpolate(points, points);
+        var interpolator = Interpolators.InterpolateNewtonPolynom(points, points);
 
-        Assert.Equal(new double[] { 0, 1, 0 }, solution);
-        Assert.Equal(new double[] { -2, 1, 3 }, points);
+        Assert.Equal([0, 1, 0], interpolator.Coefficients);
+        Assert.Equal([-2, 1, 3], points);
     }
 
-    static void Validate(double[] x, double[] y, double[] solution)
+    static void Validate(double[] x, double[] y, IInterpolator interpolator)
     {
         for (var i = 0; i < x.Length; i++)
-            AssertClose(y[i], Evaluate(solution, x[i]));
-    }
-
-    static double Evaluate(double[] coefficients, double x)
-    {
-        var result = 0.0;
-        for (var i = coefficients.Length - 1; i >= 0; i--)
-            result = result * x + coefficients[i];
-        return result;
+            AssertClose(y[i], interpolator.Evaluate(x[i]));
     }
 
     static void AssertClose(double expected, double actual)

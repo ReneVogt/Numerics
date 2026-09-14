@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Revo.Numerics;
+namespace Revo.Numerics.Types;
 
 /// <summary>
 /// Represents an arbitrarily large signed decimal

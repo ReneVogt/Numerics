@@ -3,13 +3,34 @@
 /// <summary>
 /// Interpolates points using Newton divided differences and converts the result to monomial coefficients.
 /// </summary>
-/// <remarks>
-/// Use the static <see cref="Interpolate"/> method to interpolate a set of points.
-/// For n points, the calculation takes O(n²) time and O(n) additional storage.
-/// </remarks>
-public sealed class NewtonPolynomInterpolator : IPolynomInterpolator
+/// <remarks>Instances are exposed through <see cref="Interpolators.InterpolateNewtonPolynom"/>.</remarks>
+sealed class NewtonPolynomInterpolator : IInterpolator
 {
-    NewtonPolynomInterpolator() { }
+    readonly double[] _coefficients;
+
+    /// <inheritdoc/>
+    public double[] Coefficients => [.. _coefficients];
+
+    NewtonPolynomInterpolator(double[] x, double[] y)
+    {
+        ArgumentNullException.ThrowIfNull(x, nameof(x));
+        ArgumentNullException.ThrowIfNull(y, nameof(y));
+        if (x.Length != y.Length)
+            throw new ArgumentException("The arrays must have the same length.");
+        if (x.Length == 0)
+            throw new ArgumentException("At least one point is required for interpolation.");
+
+        _coefficients = ConvertNewtonToMonomial(x, CalculateNewtonCoefficients(x, y));
+    }
+
+    /// <inheritdoc/>
+    public double Evaluate(double x) 
+    {
+        var sum = 0d;
+        for(var i=0; i < _coefficients.Length; i++)
+            sum += _coefficients[i] * Math.Pow(x, i);
+        return sum;
+    }
 
     static double[] CalculateNewtonCoefficients(double[] x, double[] y)
     {
@@ -50,37 +71,6 @@ public sealed class NewtonPolynomInterpolator : IPolynomInterpolator
         return a;
     }
 
-    /// <inheritdoc cref="IPolynomInterpolator.Interpolate"/>
-    double[] IPolynomInterpolator.Interpolate(double[] x, double[] y)
-    {
-        ArgumentNullException.ThrowIfNull(x, nameof(x));
-        ArgumentNullException.ThrowIfNull(y, nameof(y));        
-        if (x.Length != y.Length)
-            throw new ArgumentException("The arrays must have the same length.");
-
-        if (x.Length == 0) return [];
-
-        return ConvertNewtonToMonomial(x, CalculateNewtonCoefficients(x, y));
-    }
-
-    /// <summary>
-    /// Calculates monomial coefficients of the interpolating polynomial using Newton divided differences.
-    /// </summary>
-    /// <param name="x">The distinct X coordinates of the points, in any order.</param>
-    /// <param name="y">The corresponding Y coordinates, with the same length as <paramref name="x"/>.</param>
-    /// <returns>
-    /// An array a in ascending order of power, representing a[0] + a[1] * x + a[2] * x² + … .
-    /// The array has the same length as the inputs; trailing coefficients are retained even for lower-degree polynomials.
-    /// Empty inputs return an empty array; a single point returns its Y coordinate as the constant coefficient.
-    /// </returns>
-    /// <exception cref="ArgumentNullException"><paramref name="x"/> or <paramref name="y"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">The arrays have different lengths, or X coordinates are repeated.</exception>
-    /// <remarks>
-    /// Input arrays are not modified, and a nonempty result is newly allocated.
-    /// Repeated X coordinates are detected using an exact zero comparison of their difference.
-    /// Use finite coordinates; NaN and infinity are not explicitly rejected.
-    /// Floating-point roundoff and ill-conditioned interpolation data can reduce accuracy, particularly
-    /// when converting to the monomial basis.
-    /// </remarks>
-    public static double[] Interpolate(double[] x, double[] y) => ((IPolynomInterpolator)new NewtonPolynomInterpolator()).Interpolate(x, y);
+    /// <inheritdoc cref="Interpolators.InterpolateNewtonPolynom"/>
+    public static IInterpolator Create(double[] x, double[] y) => new NewtonPolynomInterpolator(x, y);
 }

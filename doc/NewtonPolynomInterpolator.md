@@ -2,13 +2,13 @@
 
 [Back to the project overview](../README.md)
 
-`NewtonPolynomInterpolator`, in `Revo.Numerics.Interpolation`, calculates a polynomial through a set of points using `double` arithmetic. It first computes Newton divided differences, then converts them to **monomial coefficients in ascending order of power**:
+`Interpolators.InterpolateNewtonPolynom`, in `Revo.Numerics.Interpolation`, creates an `IInterpolator` representing a polynomial through a set of points using `double` arithmetic. The internal `NewtonPolynomInterpolator` implementation first computes Newton divided differences, then converts them to **monomial coefficients in ascending order of power**:
 
 ```text
 p(x) = a[0] + a[1] * x + a[2] * x² + … + a[n - 1] * x^(n - 1)
 ```
 
-The returned array contains these monomial coefficients, rather than the intermediate Newton coefficients.
+The interpolator's `Coefficients` property returns these monomial coefficients, rather than the intermediate Newton coefficients. Use `Evaluate(x)` to evaluate the polynomial directly.
 
 ## Interpolating points
 
@@ -20,42 +20,37 @@ using Revo.Numerics.Interpolation;
 
 double[] x = [1, 2, 3];
 double[] y = [0, 1, 4];
-double[] coefficients = NewtonPolynomInterpolator.Interpolate(x, y);
+IInterpolator interpolator = Interpolators.InterpolateNewtonPolynom(x, y);
+double[] coefficients = interpolator.Coefficients;
 
 Console.WriteLine(string.Join(", ", coefficients)); // 1, -2, 1
 
-// Evaluate the returned polynomial using Horner's method.
-static double Evaluate(double[] coefficients, double x)
-{
-    double result = 0;
-    for (int i = coefficients.Length - 1; i >= 0; i--)
-        result = result * x + coefficients[i];
-    return result;
-}
-
-Console.WriteLine(Evaluate(coefficients, 2.5)); // 2.25
+Console.WriteLine(interpolator.Evaluate(2.5)); // 2.25
 ```
 
 The arrays contain paired coordinates: `x[i]` and `y[i]` belong to the same point. X coordinates must be distinct, but they need not be sorted or equally spaced. Reorder both arrays together to preserve the pairs.
 
-For `n` points, the result contains exactly `n` coefficients and represents a polynomial of degree at most `n - 1`. Coefficients for higher powers are retained even when the polynomial has a lower degree; they are zero in exact arithmetic but may contain small roundoff errors.
+For `n` points, `Coefficients` contains exactly `n` elements and the interpolator represents a polynomial of degree at most `n - 1`. Coefficients for higher powers are retained even when the polynomial has a lower degree; they are zero in exact arithmetic but may contain small roundoff errors.
 
-Neither input array is modified. A nonempty result is a new array, independent of both inputs. The calculation takes `O(n²)` time and `O(n)` additional storage.
+Neither input array is modified or retained. Changing the input arrays after construction does not affect the interpolator. Each access to `Coefficients` returns a new, independent array; changing that array does not affect later coefficient access or `Evaluate`.
+
+Construction takes `O(n²)` time and `O(n)` additional storage. Accessing `Coefficients` copies `n` elements. Evaluation sums the monomial terms using the stored coefficients.
 
 ## API summary and validation
 
 | Member | Purpose |
 | --- | --- |
-| `NewtonPolynomInterpolator.Interpolate(x, y)` | Compute the monomial coefficients using Newton divided differences. |
-| `IPolynomInterpolator.Interpolate(x, y)` | Define the instance interpolation contract for implementations. |
+| `Interpolators.InterpolateNewtonPolynom(x, y)` | Create an `IInterpolator` using Newton divided differences. |
+| `IInterpolator.Coefficients` | For Newton interpolation, return a new array of monomial coefficients in ascending order of power. |
+| `IInterpolator.Evaluate(x)` | Evaluate the interpolating function at the supplied coordinate. |
 
-`NewtonPolynomInterpolator` implements `IPolynomInterpolator` explicitly. Its current public entry point is the static method; the class has no public constructor or factory returning an interface instance.
+`NewtonPolynomInterpolator` is an internal implementation. Create instances through the public `Interpolators` factory and use the returned `IInterpolator`. The interface represents interpolating functions in general; the coefficient basis and order depend on the interpolation method.
 
 - A null array throws `ArgumentNullException`, identifying `x` or `y`.
 - Arrays of different lengths throw `ArgumentException`.
 - Repeated X coordinates throw `ArgumentException`, even if their Y coordinates agree or the repeated entries are not adjacent. Positive and negative zero count as the same X coordinate.
-- Two empty arrays return an empty coefficient array.
-- A single point returns `[y[0]]`, representing a constant polynomial.
+- Two empty arrays throw `ArgumentException`; at least one point is required.
+- A single point produces coefficients `[y[0]]` and a constant polynomial, including away from the supplied X coordinate.
 
 ## Numerical behavior
 
@@ -65,4 +60,4 @@ Duplicate X coordinates are detected by comparing their difference exactly to ze
 
 When checking results, compare both coefficients and evaluated values with absolute/relative tolerances suitable for the scale of your data. Interpolation passes through the supplied points in exact arithmetic; it does not perform least-squares fitting of noisy measurements. Evaluation outside the range of the points is extrapolation and may be inaccurate as an approximation of the underlying function.
 
-Source: [NewtonPolynomInterpolator](../src/Numerics/Numerics/Interpolation/NewtonPolynomInterpolator.cs) and [IPolynomInterpolator](../src/Numerics/Numerics/Interpolation/IPolynomInterpolator.cs).
+Source: [Interpolators](../src/Numerics/Numerics/Interpolation/Interpolators.cs), [IInterpolator](../src/Numerics/Numerics/Interpolation/IInterpolator.cs), and [NewtonPolynomInterpolator](../src/Numerics/Numerics/Interpolation/NewtonPolynomInterpolator.cs).

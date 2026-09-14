@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace Revo.Numerics;
+namespace Revo.Numerics.Types;
 
 public readonly partial struct BigDecimal
 {
