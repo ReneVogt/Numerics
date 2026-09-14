@@ -12,6 +12,9 @@ public interface IInterpolator
     /// <remarks>
     /// For instances returned by <see cref="Interpolators.InterpolateNewtonPolynom"/>,
     /// each access returns a new array of monomial coefficients in ascending order of power.
+    /// For instances returned by <see cref="Interpolators.InterpolateTrigonometric"/>,
+    /// each access returns a new array of cosine/sine pairs as described by
+    /// <see cref="TrigonometricInterpolator.Coefficients"/>.
     /// </remarks>
     double[] Coefficients { get; }
 

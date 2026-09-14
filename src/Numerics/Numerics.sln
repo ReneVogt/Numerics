@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36121.58 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12201.205 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerics", "Numerics\Numerics.csproj", "{AD454B49-564B-4F1C-987E-248727C51796}"
 EndProject
@@ -13,6 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Pr
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numerics.Tests", "Numerics.Tests\Numerics.Tests.csproj", "{843EC5FB-FCBC-4B69-A3DA-6DF2BCE3372F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{E55F8996-D075-46E4-8F7A-03984F3A77D2}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\doc\BigDecimal.md = ..\..\doc\BigDecimal.md
+		..\..\doc\LinearSolver.md = ..\..\doc\LinearSolver.md
+		..\..\doc\NewtonPolynomInterpolator.md = ..\..\doc\NewtonPolynomInterpolator.md
+		..\..\doc\RomanNumber.md = ..\..\doc\RomanNumber.md
+		..\..\doc\TrigonometricInterpolator.md = ..\..\doc\TrigonometricInterpolator.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

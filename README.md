@@ -10,6 +10,7 @@ A collection of numeric data structures and operations for .NET.
 | **RomanNumber** | Converts positive integers to Roman numerals and parses Roman numerals, with options for subtractive and additive notation. | [RomanNumber guide](doc/RomanNumber.md) |
 | **LinearSolver** | Solves square linear equation systems using LU decomposition with complete pivoting. Supports reusing a factorization for multiple right-hand sides. | [LinearSolver guide](doc/LinearSolver.md) |
 | **Newton polynomial interpolation** | Creates an `IInterpolator` through `Interpolators.InterpolateNewtonPolynom`, with polynomial evaluation and monomial coefficients in ascending order of power. | [NewtonPolynomInterpolator guide](doc/NewtonPolynomInterpolator.md) |
+| **TrigonometricInterpolator** | Interpolates periodic data with a specified period, exposing evaluation and complete cosine/sine coefficient pairs through `IInterpolator`. | [TrigonometricInterpolator guide](doc/TrigonometricInterpolator.md) |
 
 ## Getting started
 
@@ -27,7 +28,7 @@ The guides contain C# examples, API summaries, and notes on supported inputs and
 using Revo.Numerics;         // BigDecimal
 using Revo.Numerics.Types;   // BigDecimalContext, RomanNumber, RomanParseOptions
 using Revo.Numerics.Solvers; // LinearSolver and related types
-using Revo.Numerics.Interpolation; // Interpolators, IInterpolator
+using Revo.Numerics.Interpolation; // Interpolators, IInterpolator, TrigonometricInterpolator
 ```
 
 ## Build and test

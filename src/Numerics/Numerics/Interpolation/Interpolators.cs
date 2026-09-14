@@ -28,5 +28,6 @@ public static class Interpolators
     /// converting to the monomial basis. Evaluation outside the range of the points is extrapolation.
     /// </remarks>
     public static IInterpolator InterpolateNewtonPolynom(double[] x, double[] y) => NewtonPolynomInterpolator.Create(x, y);
+    /// <inheritdoc cref="TrigonometricInterpolator.Create"/>
     public static IInterpolator InterpolateTrigonometric(double[] x, double[] y, double period) => TrigonometricInterpolator.Create(x, y, period);
 }
