@@ -76,7 +76,7 @@ public sealed class LinearSolver : ILinearSolver
             Log($"[{processingRow}] Pivoted ({maxrow}, {maxcol})");
 
             maxrow = maxcol = processingRow+1;
-            var maxU = Math.Abs(_lu[maxrow, maxcol]);
+            var maxU = 0d;
 
             // eliminate
             for (var eliminatingRow = processingRow+1; eliminatingRow < _variableCount; eliminatingRow++)

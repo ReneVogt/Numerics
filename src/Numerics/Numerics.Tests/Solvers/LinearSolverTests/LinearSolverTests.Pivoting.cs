@@ -18,6 +18,26 @@ public partial class LinearSolverTests
         { [10, 0, 0, 0, 1, 2, 0, 3, 4], [10, 8, 18], [1, 2, 3] }
     };
 
+    [Fact]
+    public void InstanceSolve_PivotBecomesZeroDuringElimination_SelectsAnotherPivot()
+    {
+        double[] coefficients =
+        [
+            1, 1, 0,
+            1, 1, 1,
+            0, 1, 0
+        ];
+
+        // Elimination leaves [0, 1; 1, 0]. The next pivot must be selected
+        // using updated values, not the previous diagonal's magnitude of 1.
+        var solver = LinearSolver.Create(3, coefficients);
+
+        var actual = solver.Solve([3, 6, 2]);
+
+        Assert.False(solver.IsSingularMatrix);
+        AssertSolution([1, 2, 3], actual);
+    }
+
     [Theory]
     [MemberData(nameof(PivotingCases))]
     public void InstanceSolve_Pivoting_ReturnsVariablesInOriginalOrder(
