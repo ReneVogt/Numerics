@@ -175,6 +175,51 @@ public sealed partial class NewtonPolynomInterpolatorTests
             $"Expected {expected:R}, actual {actual:R}, tolerance {tolerance:R}.");
     }
 
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(2, 4)]
+    [InlineData(0.5, 0.25)]
+    [InlineData(3, 9)]
+    public void Evaluate_TranslatedQuadratic_PreservesAccuracy(double offset, double expected)
+    {
+        var interpolator = Interpolators.InterpolateNewtonPolynom(
+            [100000000, 100000001, 100000002], [0, 1, 4]);
+
+        AssertClose(expected, interpolator.Evaluate(100000000 + offset));
+        _ = interpolator.Coefficients;
+        AssertClose(expected, interpolator.Evaluate(100000000 + offset));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1e155)]
+    [InlineData(2e155)]
+    public void Evaluate_ConstantAtLargeNodes_ReturnsConstant(double x)
+    {
+        var interpolator = Interpolators.InterpolateNewtonPolynom(
+            [0, 1e155, 2e155], [7, 7, 7]);
+
+        Assert.Equal(7, interpolator.Evaluate(x));
+        _ = interpolator.Coefficients;
+        Assert.Equal(7, interpolator.Evaluate(x));
+    }
+
+    [Fact]
+    public void Coefficients_InputsChangedBeforeFirstAccess_UsesOriginalPoints()
+    {
+        double[] xs = [1, 2, 3];
+        double[] ys = [0, 1, 4];
+        var interpolator = Interpolators.InterpolateNewtonPolynom(xs, ys);
+
+        xs[0] = 100;
+        ys[0] = 200;
+
+        AssertClose(2.25, interpolator.Evaluate(2.5));
+        Assert.Equal([1, -2, 1], interpolator.Coefficients);
+        AssertClose(2.25, interpolator.Evaluate(2.5));
+    }
+
     [GeneratedRegex(@"\s+")]
     private static partial Regex MatrixSplitRegex();
 }

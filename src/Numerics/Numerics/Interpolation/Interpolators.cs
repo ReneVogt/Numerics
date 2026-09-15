@@ -22,6 +22,9 @@ public static class Interpolators
     /// The input arrays are neither modified nor retained. Each access to
     /// <see cref="IInterpolator.Coefficients"/> returns a new array; modifying it does not affect
     /// subsequent coefficient access or evaluation. Construction takes O(n²) time and O(n) additional storage.
+    /// Evaluation uses the Newton representation directly in O(n) time.
+    /// Monomial coefficients are computed once on first access in O(n²) time and cached;
+    /// each access copies the cached coefficients in O(n) time.
     /// Repeated X coordinates are detected by comparing their difference exactly to zero.
     /// Use finite coordinates; NaN and infinity are not explicitly rejected.
     /// Floating-point roundoff and ill-conditioned data can reduce accuracy, particularly when

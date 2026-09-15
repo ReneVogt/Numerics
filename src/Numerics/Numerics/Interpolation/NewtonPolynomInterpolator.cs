@@ -1,15 +1,17 @@
 ﻿namespace Revo.Numerics.Interpolation;
 
 /// <summary>
-/// Interpolates points using Newton divided differences and converts the result to monomial coefficients.
+/// Interpolates and evaluates points in Newton form, converting to monomial coefficients on demand.
 /// </summary>
 /// <remarks>Instances are exposed through <see cref="Interpolators.InterpolateNewtonPolynom"/>.</remarks>
 sealed class NewtonPolynomInterpolator : IInterpolator
 {
-    readonly double[] _coefficients;
+    readonly double[] _nodes;
+    readonly double[] _newtonCoefficients;
+    readonly Lazy<double[]> _coefficients;
 
     /// <inheritdoc/>
-    public double[] Coefficients => [.. _coefficients];
+    public double[] Coefficients => [.. _coefficients.Value];
 
     NewtonPolynomInterpolator(double[] x, double[] y)
     {
@@ -20,16 +22,19 @@ sealed class NewtonPolynomInterpolator : IInterpolator
         if (x.Length == 0)
             throw new ArgumentException("At least one point is required for interpolation.");
 
-        _coefficients = ConvertNewtonToMonomial(x, CalculateNewtonCoefficients(x, y));
+        _nodes = [.. x];
+        _newtonCoefficients = CalculateNewtonCoefficients(_nodes, y);
+        _coefficients = new Lazy<double[]>(
+            () => ConvertNewtonToMonomial(_nodes, _newtonCoefficients));
     }
 
     /// <inheritdoc/>
     public double Evaluate(double x) 
     {
-        var sum = 0d;
-        for(var i=0; i < _coefficients.Length; i++)
-            sum += _coefficients[i] * Math.Pow(x, i);
-        return sum;
+        var value = _newtonCoefficients[^1];
+        for (var i = _newtonCoefficients.Length - 2; i >= 0; i--)
+            value = _newtonCoefficients[i] + (x - _nodes[i]) * value;
+        return value;
     }
 
     static double[] CalculateNewtonCoefficients(double[] x, double[] y)
