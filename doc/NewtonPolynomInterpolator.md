@@ -34,7 +34,7 @@ For `n` points, `Coefficients` contains exactly `n` elements and the interpolato
 
 Neither input array is modified or retained. Changing the input arrays after construction does not affect the interpolator. Each access to `Coefficients` returns a new, independent array; changing that array does not affect later coefficient access or `Evaluate`.
 
-Construction takes `O(n²)` time and `O(n)` additional storage. Accessing `Coefficients` copies `n` elements. Evaluation sums the monomial terms using the stored coefficients.
+Construction takes `O(n²)` time and `O(n)` additional storage. Monomial coefficients are computed lazily on first access in `O(n²)` time and cached; accessing `Coefficients` copies `n` elements. Evaluation uses nested Newton evaluation in `O(n)` time, independently of monomial conversion.
 
 ## API summary and validation
 
@@ -51,12 +51,18 @@ Construction takes `O(n²)` time and `O(n)` additional storage. Accessing `Coeff
 - Repeated X coordinates throw `ArgumentException`, even if their Y coordinates agree or the repeated entries are not adjacent. Positive and negative zero count as the same X coordinate.
 - Two empty arrays throw `ArgumentException`; at least one point is required.
 - A single point produces coefficients `[y[0]]` and a constant polynomial, including away from the supplied X coordinate.
+- Nonfinite coordinates in either input array throw `ArgumentException`, identifying `x` or `y`.
+- A required Newton coefficient that overflows, or a nonzero coefficient that underflows to zero, causes construction to throw `ArithmeticException`. Nonzero subnormal coefficients are supported.
+- Monomial conversion applies the same range checks when `Coefficients` is first accessed. Failure of this conversion does not prevent subsequent Newton evaluation.
+- `Evaluate` rejects nonfinite coordinates with `ArgumentOutOfRangeException` and throws `ArithmeticException` if a required Newton evaluation step overflows. Evaluation results may underflow to zero.
 
 ## Numerical behavior
 
-Use finite coordinates. The implementation does not explicitly reject `NaN` or infinity in the arrays, and these can propagate into the result.
+Use finite coordinates. Divided differences use separately scaled numerator and denominator differences, with powers of two and an extended intermediate exponent range. This avoids an overflowing difference destroying a representable quotient. For example, both the line through `(-1e308, -1), (1e308, 1)` and the line through `(-1, -1e308), (1, 1e308)` can be constructed and evaluated.
 
-Duplicate X coordinates are detected by comparing their difference exactly to zero, without a tolerance. Very close but distinct coordinates are accepted; they can nevertheless amplify floating-point errors. High polynomial degrees, large coordinate magnitudes, and conversion to the monomial basis can also reduce accuracy or cause overflow. Changing point order can change rounding errors, although the mathematical interpolating polynomial is unchanged.
+Nested Newton evaluation and monomial conversion use fused multiply-add operations, with scaled intermediate arithmetic where needed. This also avoids a product overflowing before an addition brings the result back into range. Stored Newton and monomial coefficients are still `double` values: this is not arbitrary-precision arithmetic, and intermediate coefficients or evaluation steps outside the supported range can still cause explicit numerical failure even when some final results are representable.
+
+Duplicate X coordinates are detected by exact equality, without a tolerance. Very close but distinct coordinates are accepted; they can nevertheless amplify floating-point errors. High polynomial degrees, large coordinate magnitudes, and conversion to the monomial basis can also reduce accuracy or exceed the supported numerical range. Scaling avoids unnecessary range failures but does not fix ill-conditioning or eliminate rounding errors. Changing point order can change rounding errors, although the mathematical interpolating polynomial is unchanged.
 
 When checking results, compare both coefficients and evaluated values with absolute/relative tolerances suitable for the scale of your data. Interpolation passes through the supplied points in exact arithmetic; it does not perform least-squares fitting of noisy measurements. Evaluation outside the range of the points is extrapolation and may be inaccurate as an approximation of the underlying function.
 

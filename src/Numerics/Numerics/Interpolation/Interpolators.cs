@@ -17,7 +17,8 @@ public static class Interpolators
     /// a constant polynomial with value <c>y[0]</c>.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="x"/> or <paramref name="y"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">The arrays are empty, have different lengths, or contain repeated X coordinates.</exception>
+    /// <exception cref="ArgumentException">The arrays are empty, have different lengths, contain nonfinite coordinates, or contain repeated X coordinates.</exception>
+    /// <exception cref="ArithmeticException">A required Newton coefficient overflows or a nonzero coefficient underflows to zero.</exception>
     /// <remarks>
     /// The input arrays are neither modified nor retained. Each access to
     /// <see cref="IInterpolator.Coefficients"/> returns a new array; modifying it does not affect
@@ -25,8 +26,13 @@ public static class Interpolators
     /// Evaluation uses the Newton representation directly in O(n) time.
     /// Monomial coefficients are computed once on first access in O(n²) time and cached;
     /// each access copies the cached coefficients in O(n) time.
-    /// Repeated X coordinates are detected by comparing their difference exactly to zero.
-    /// Use finite coordinates; NaN and infinity are not explicitly rejected.
+    /// Repeated X coordinates are detected by exact equality. All coordinates must be finite.
+    /// Scaled intermediate arithmetic avoids overflowing differences before division.
+    /// Required coefficients must fit in double; nonzero subnormal coefficients are supported.
+    /// Monomial conversion can throw ArithmeticException on first coefficient access if a required
+    /// coefficient overflows or underflows to zero, without preventing Newton evaluation.
+    /// Evaluation requires a finite coordinate and throws ArithmeticException if a required
+    /// Newton evaluation step overflows. Evaluation results may underflow to zero.
     /// Floating-point roundoff and ill-conditioned data can reduce accuracy, particularly when
     /// converting to the monomial basis. Evaluation outside the range of the points is extrapolation.
     /// </remarks>
