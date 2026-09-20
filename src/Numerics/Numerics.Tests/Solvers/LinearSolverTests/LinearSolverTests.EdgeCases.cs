@@ -4,6 +4,60 @@ namespace Numerics.Tests.Solvers.LinearSolverTests;
 
 public partial class LinearSolverTests
 {
+    [Theory]
+    [InlineData(0.1, 1)]
+    [InlineData(0.1, -1)]
+    [InlineData(LinearSolver.DefaultEpsilon, 1)]
+    [InlineData(LinearSolver.DefaultEpsilon, -1)]
+    public void InstanceSolve_SubToleranceBlockWithoutPivot_PreservesRightHandSide(double epsilon, double sign)
+    {
+        var solver = LinearSolver.Create(2, [0, 0, epsilon / 2, 0], epsilon);
+        Assert.True(solver.IsSingularMatrix);
+
+        foreach (var factor in new[] { 0.99, 1, 1 + epsilon / 4 })
+        {
+            var rightHandSide = new[] { sign * epsilon, sign * epsilon * factor };
+            var original = (double[])rightHandSide.Clone();
+
+            var exception = Assert.Throws<SingularMatrixException>(() => solver.Solve(rightHandSide));
+
+            Assert.Equal(factor <= 1 ? LinearEquationSystemState.InfiniteSolutions : LinearEquationSystemState.NoSolution, exception.State);
+            Assert.Equal(original, rightHandSide);
+        }
+    }
+
+    [Theory]
+    [InlineData(0.124, LinearEquationSystemState.InfiniteSolutions)]
+    [InlineData(0.125, LinearEquationSystemState.InfiniteSolutions)]
+    [InlineData(0.129, LinearEquationSystemState.NoSolution)]
+    [InlineData(-0.124, LinearEquationSystemState.InfiniteSolutions)]
+    [InlineData(-0.125, LinearEquationSystemState.InfiniteSolutions)]
+    [InlineData(-0.129, LinearEquationSystemState.NoSolution)]
+    public void InstanceSolve_SubToleranceBlockAfterPivot_OnlyAppliesCompletedElimination(
+        double trailingRightHandSide,
+        LinearEquationSystemState expected)
+    {
+        // The first pivot swaps both rows and columns. The residual 0.0625 is not an L multiplier.
+        var solver = LinearSolver.Create(3, [0, 1, 0, 0, 4, 0, 0.0625, 2, 0], epsilon: 0.125);
+        Assert.True(solver.IsSingularMatrix);
+
+        foreach (var pivotRightHandSide in new[] { 0d, 1d, -1d })
+        {
+            var rightHandSide = new[]
+            {
+                0.25 * pivotRightHandSide + Math.CopySign(0.125, trailingRightHandSide),
+                pivotRightHandSide,
+                0.5 * pivotRightHandSide + trailingRightHandSide
+            };
+            var original = (double[])rightHandSide.Clone();
+
+            var exception = Assert.Throws<SingularMatrixException>(() => solver.Solve(rightHandSide));
+
+            Assert.Equal(expected, exception.State);
+            Assert.Equal(original, rightHandSide);
+        }
+    }
+
     [Fact]
     public void InstanceSolve_ZeroMatrixAndZeroRightHandSide_HasInfiniteSolutions()
     {

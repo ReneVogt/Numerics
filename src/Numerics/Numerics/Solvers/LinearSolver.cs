@@ -127,7 +127,8 @@ public sealed class LinearSolver : ILinearSolver
         for (var row = 0; row < _variableCount; row++)
         {
             var sum = rightHandSide[_lu.RowPivot[row]];
-            for (var col = 0; col < row; col++)
+            // Only processed columns contain L multipliers; the trailing L block is the identity.
+            for (var col = 0; col < Math.Min(row, _processedRows); col++)
                 sum -= _lu[row, col] * y[col];
 
             y[row] = sum;
@@ -176,8 +177,9 @@ public sealed class LinearSolver : ILinearSolver
     [Conditional("DEBUG")]
     void ValidateLU(double[] a)
     {
-        var l = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => row > col ? _lu[row, col] : (row == col ? 1.0 : 0.0))).ToArray();
-        var u = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => row <= col ? _lu[row, col] : 0.0)).ToArray();
+        // Preserve the unprocessed residual block in U, with an identity block in L.
+        var l = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => row > col && col < _processedRows ? _lu[row, col] : (row == col ? 1.0 : 0.0))).ToArray();
+        var u = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => row <= col || col >= _processedRows ? _lu[row, col] : 0.0)).ToArray();
         var lu = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => Enumerable.Range(0, _variableCount).Sum(k => l[row * _variableCount + k] * u[k * _variableCount + col]))).ToArray();
         var pivotedA = Enumerable.Range(0, _variableCount).SelectMany(row => Enumerable.Range(0, _variableCount).Select(col => a[_lu.RowPivot[row] * _variableCount + _lu.ColumnPivot[col]])).ToArray();
         Debug.Assert(lu.Zip(pivotedA).All(x => Math.Abs(x.First - x.Second) <= _epsilon));
